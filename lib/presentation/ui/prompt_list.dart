@@ -1,34 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:writing_prompt/domain/bloc/prompt_bloc.dart';
-import 'package:writing_prompt/domain/models/prompt.dart';
+import 'package:writing_prompt/data/models/prompt.dart';
 import 'package:writing_prompt/presentation/styles/colors.dart';
 import 'package:writing_prompt/presentation/styles/dimensions.dart';
 import 'package:writing_prompt/presentation/styles/strings.dart';
 import 'package:writing_prompt/presentation/styles/text_styles.dart';
+import 'package:writing_prompt/domain/bloc/block_provider.dart';
 
 class PromptListPage extends StatefulWidget {
-  final PromptBloc bloc;
-
-  PromptListPage({Key key, this.title, this.bloc}) : super(key: key);
-  final String title;
-
   @override
-  _PromptListPageState createState() => _PromptListPageState();
+  State<StatefulWidget> createState() {
+    return _PromptListPageState();
+  }
 }
 
 class _PromptListPageState extends State<PromptListPage> {
+  PromptBloc bloc;
+
   @override
   Widget build(BuildContext context) {
+    bloc = BlocProvider.of<PromptBloc>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title, style: titleBarTextStyle(),),
+        title: Text('List', style: titleBarTextStyle(),),
         elevation: 0.0,
       ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.only(top: screenPadding, left: screenPadding, right: screenPadding),
           child: StreamBuilder<List<Prompt>>(
-            stream: widget.bloc.promptHistory,
+            stream: bloc.promptHistory,
             builder: (context, snapshot) =>
               snapshot.data == null ?
                 Text(
@@ -43,7 +45,6 @@ class _PromptListPageState extends State<PromptListPage> {
         ),
       ),
       backgroundColor: titleBarBackground,
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
@@ -54,14 +55,14 @@ class _PromptListPageState extends State<PromptListPage> {
         child: Row(
           children: <Widget>[
             Expanded(
-                child: Text(prompt.prompt)
+                child: Text(prompt.english)
             ),
             Checkbox(
                 value: prompt.done == null ? false : prompt.done,
                 onChanged: (bool newValue) {
                   setState(() {
                     prompt.done = newValue;
-                    widget.bloc.promptUpdate.add(prompt);
+                    bloc.promptUpdate.add(prompt);
                   });
                 }
             )

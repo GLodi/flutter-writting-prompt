@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_simple_dependency_injection/injector.dart';
+
 import 'package:writing_prompt/domain/bloc/prompt_bloc.dart';
 import 'package:writing_prompt/presentation/styles/strings.dart';
 import 'package:writing_prompt/presentation/ui/prompt_list.dart';
 import 'package:writing_prompt/presentation/ui/single_prompt.dart';
+import 'package:writing_prompt/domain/bloc/block_provider.dart';
 
 class HomePage extends StatefulWidget {
-  final PromptBloc bloc;
-
-  HomePage({Key key, this.bloc}) : super(key: key);
-
   @override
   State<StatefulWidget> createState() {
     return _HomePageState();
@@ -52,8 +51,8 @@ class _HomePageState extends State<HomePage> {
 
   void buildChildren(BuildContext context) {
     _children = [
-      SinglePromptPage(bloc: widget.bloc, title: appName),
-      PromptListPage(bloc: widget.bloc, title: appName),
+      BlocProvider(child: SinglePromptPage(), bloc: Injector.getInjector().get<PromptBloc>()),
+      BlocProvider(child: PromptListPage(), bloc: Injector.getInjector().get<PromptBloc>())
     ];
   }
 }

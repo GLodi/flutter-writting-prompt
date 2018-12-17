@@ -1,10 +1,11 @@
 import 'package:rxdart/rxdart.dart';
-import 'package:writing_prompt/domain/managers/prompt_manager.dart';
 import 'dart:async';
 
-import 'package:writing_prompt/domain/models/prompt.dart';
+import 'package:writing_prompt/domain/managers/prompt_manager.dart';
+import 'package:writing_prompt/data/models/prompt.dart';
+import 'package:writing_prompt/domain/bloc/block_provider.dart';
 
-class PromptBloc {
+class PromptBloc extends BlocBase {
   PromptManager _promptManager;
 
   final _promptSubject = BehaviorSubject<Prompt>();
@@ -12,8 +13,6 @@ class PromptBloc {
   final _promptUpdateSubject = PublishSubject<Prompt>();
   final _promptInsertSubject = PublishSubject<Prompt>();
   final _fetchPromptSubject = PublishSubject<int>();
-
-
 
   Stream<Prompt> get prompt => _promptSubject.stream;
   Stream<List<Prompt>> get promptHistory => _promptHistorySubject.stream;
@@ -67,4 +66,14 @@ class PromptBloc {
         })
         .listen(_promptInsertSubject.add);
   }
+
+  @override
+  void dispose() {
+    _promptSubject.close();
+    _promptHistorySubject.close();
+    _promptUpdateSubject.close();
+    _promptInsertSubject.close();
+    _fetchPromptSubject.close();
+  }
+
 }

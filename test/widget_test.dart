@@ -7,22 +7,39 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:writing_prompt/domain/models/prompt.dart';
+import 'package:writing_prompt/data/models/prompt.dart';
 
 import 'package:writing_prompt/main.dart';
 import 'package:writing_prompt/presentation/styles/strings.dart';
 import 'package:mockito/mockito.dart';
-
+import 'package:flutter_simple_dependency_injection/injector.dart';
 
 import 'mocks.dart';
+
+import 'package:writing_prompt/data/local/db_helper.dart';
+import 'package:writing_prompt/data/remote/prompt_api.dart';
+import 'package:writing_prompt/domain/managers/prompt_manager.dart';
+import 'package:writing_prompt/domain/bloc/prompt_bloc.dart';
 
 void main() {
   const bottomBarKey = Key(key_bottom_bar);
 
+  final injector = Injector.getInjector();
+  injector.map<String>((i) =>
+  'https://ineedaprompt.com/dictionary/default/prompt?q=adj+noun+adv+verb+noun+location', key: 'api_url');
+  injector.map<DbHelper>((i) =>
+    new DbHelper(), isSingleton: true);
+  injector.map<PromptApi>((i) =>
+    new PromptApi(), isSingleton: true);
+  injector.map<PromptManager>((i) =>
+    new PromptManager(i.get<PromptApi>(), i.get<DbHelper>()), isSingleton: true);
+  injector.map<PromptBloc>((i) =>
+    new PromptBloc(i.get<PromptManager>()), isSingleton: true);
+
   testWidgets('When we open app, home is selected', (WidgetTester tester) async {
     var bloc = MockBloc();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(WritingPromptApp(bloc: bloc));
+    await tester.pumpWidget(App());
 
     expect(find.byKey(Key(key_bottom_bar)), findsOneWidget);
     expect(find.byIcon(Icons.home), findsOneWidget);
@@ -36,7 +53,7 @@ void main() {
   testWidgets('When we click on lists, the index changes and the new page appears', (WidgetTester tester) async {
     var bloc = MockBloc();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(WritingPromptApp(bloc: bloc));
+    await tester.pumpWidget(App());
 
     await tester.tap(
         find.byIcon(Icons.list)
@@ -51,10 +68,10 @@ void main() {
     var bloc = MockBloc();
     const text = "String test";
     List<Prompt> list = List<Prompt>();
-    list.add(Prompt(text, 0, false));
+    list.add(Prompt(10, text, false));
     when(bloc.prompt).thenAnswer((_) => Stream.fromIterable(list));
     // Build our app and trigger a frame.
-    await tester.pumpWidget(WritingPromptApp(bloc: bloc));
+    await tester.pumpWidget(App());
     await tester.pump();
 
     Text textWidget = tester.firstWidget(find.byKey(Key(key_prompt_text)));
@@ -64,7 +81,7 @@ void main() {
   testWidgets('When we cannot fetch a prompt, display empty message', (WidgetTester tester) async {
     var bloc = MockBloc();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(WritingPromptApp(bloc: bloc));
+    await tester.pumpWidget(App());
     await tester.pump();
 
     Text textWidget = tester.firstWidget(find.byKey(Key(key_prompt_text)));
@@ -74,7 +91,7 @@ void main() {
   testWidgets('When no history, display empty message', (WidgetTester tester) async {
     var bloc = MockBloc();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(WritingPromptApp(bloc: bloc));
+    await tester.pumpWidget(App());
 
     await tester.tap(
         find.byIcon(Icons.list)
@@ -90,11 +107,11 @@ void main() {
     const text = "String test";
     List<List<Prompt>> promptLists = List<List<Prompt>>();
     List<Prompt> list = List<Prompt>();
-    list.add(Prompt(text, 0, false));
+    list.add(Prompt(10, text, false));
     promptLists.add(list);
     when(bloc.promptHistory).thenAnswer((_) => Stream.fromIterable(promptLists));
     // Build our app and trigger a frame.
-    await tester.pumpWidget(WritingPromptApp(bloc: bloc));
+    await tester.pumpWidget(App());
     await tester.pump();
 
     await tester.tap(

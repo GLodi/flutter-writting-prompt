@@ -1,13 +1,14 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:writing_prompt/data/local/model/prompt_local.dart';
+
+import 'package:writing_prompt/data/models/prompt.dart';
 
 final String tablePrompt = 'prompt';
-final String columnId = '_id';
-final String columnTitle = 'title';
+final String columnCount = 'count';
+final String columnEnglish = 'english';
 final String columnDone = 'done';
 
-class DBHelper {
+class DbHelper {
   Database _db;
 
   Future<Database> get db async {
@@ -23,43 +24,44 @@ class DBHelper {
         onCreate: (Database db, int version) async {
           await db.execute('''
             create table $tablePrompt ( 
-              $columnId integer primary key autoincrement, 
-              $columnTitle text not null,
+              $columnCount integer primary key, 
+              $columnEnglish text not null,
               $columnDone integer not null)
             ''');
         });
   }
 
-  Future<int> insert(PromptLocal prompt) async {
+  Future<int> insert(Prompt prompt) async {
     var dbClient = await db;
     return await dbClient.insert(tablePrompt, prompt.toMap());
   }
 
-  Future<List<PromptLocal>> getPrompts() async {
+  Future<List<Prompt>> getPrompts() async {
     var dbClient = await db;
     List<Map> maps = await dbClient.query(tablePrompt);
-    List<PromptLocal> prompts =List<PromptLocal>();
+    List<Prompt> prompts = List<Prompt>();
     for (var value in maps) {
-      prompts.add(PromptLocal.fromMap(value));
+      prompts.add(Prompt.fromMap(value));
     }
     return prompts;
   }
 
   Future<int> delete(int id) async {
     var dbClient = await db;
-    return await dbClient.delete(tablePrompt, where: '$columnId = ?', whereArgs: [id]);
+    return await dbClient.delete(tablePrompt, where: '$columnCount = ?', whereArgs: [id]);
   }
 
-  Future<int> update(PromptLocal prompt) async {
+  Future<int> update(Prompt prompt) async {
     var dbClient = await db;
     return await dbClient.update(tablePrompt, prompt.toMap(),
-        where: '$columnId = ?', whereArgs: [prompt.id]);
+        where: '$columnCount = ?', whereArgs: [prompt.count]);
   }
 
   Future close() async {
     await db
-        ..close();
+      ..close();
   }
-  
-  DBHelper();
+
+  DbHelper();
+
 }

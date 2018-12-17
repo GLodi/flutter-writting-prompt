@@ -1,35 +1,26 @@
 import 'package:rxdart/rxdart.dart';
-import 'package:writing_prompt/data/local/database/prompt_provider.dart';
-import 'package:writing_prompt/data/remote/api/prompt_api.dart';
-import 'package:writing_prompt/domain/mapper/prompt_mappers.dart';
-import 'package:writing_prompt/domain/models/prompt.dart';
+import 'package:writing_prompt/data/remote/prompt_api.dart';
+import 'package:writing_prompt/data/local/db_helper.dart';
+import 'package:writing_prompt/data/models/prompt.dart';
 
+/// Here I am also supposed to check whether I already have a
+/// prompt or not.
 class PromptManager {
   PromptApi _api;
-  PromptRemoteMapper _remoteMapper;
-  PromptLocalInverseMapper _localInverseMapper;
-  PromptLocalMapper _localMapper;
-  DBHelper _dbHelper;
+  DbHelper _dbHelper;
 
-  PromptManager(this._api, this._remoteMapper, this._localInverseMapper, this._localMapper, this._dbHelper);
+  PromptManager(this._api, this._dbHelper);
 
   Observable<Prompt> getPrompt() =>
-      Observable.fromFuture(_api.fetchPrompt())
-          .map((article) => _remoteMapper.map(article));
+      Observable.fromFuture(_api.fetchPrompt());
 
   Observable<int> insertPrompt(Prompt prompt) =>
-      Observable.fromFuture(
-          _dbHelper.insert(_localInverseMapper.map(prompt))
-      );
+      Observable.fromFuture(_dbHelper.insert(prompt));
 
   Observable<List<Prompt>> getListOfPrompts() =>
-      Observable.fromFuture(_dbHelper.getPrompts())
-      .map((prompts) => _localMapper.mapList(prompts));
+      Observable.fromFuture(_dbHelper.getPrompts());
 
-  Observable<int> updatePrompt(Prompt prompt) {
-    var local = _localInverseMapper.map(prompt);
-    return Observable.fromFuture(
-        _dbHelper.update(local)
-    );
-  }
+  Observable<int> updatePrompt(Prompt prompt) =>
+      Observable.fromFuture(_dbHelper.update(prompt));
+
 }

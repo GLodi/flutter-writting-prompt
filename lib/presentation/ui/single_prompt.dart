@@ -1,28 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:writing_prompt/domain/bloc/prompt_bloc.dart';
-import 'package:writing_prompt/domain/models/prompt.dart';
+import 'package:writing_prompt/data/models/prompt.dart';
 import 'package:writing_prompt/presentation/styles/colors.dart';
 import 'package:writing_prompt/presentation/styles/dimensions.dart';
 import 'package:writing_prompt/presentation/styles/strings.dart';
 import 'package:writing_prompt/presentation/styles/text_styles.dart';
 import 'package:writing_prompt/presentation/utils/refresh_button.dart';
+import 'package:writing_prompt/domain/bloc/prompt_bloc.dart';
+import 'package:writing_prompt/domain/bloc/block_provider.dart';
 
-class SinglePromptPage extends StatefulWidget {
-  final PromptBloc bloc;
-
-  SinglePromptPage({Key key, this.title, this.bloc}) : super(key: key);
-  final String title;
-
-  @override
-  _SinglePromptPageState createState() => _SinglePromptPageState();
-}
-
-class _SinglePromptPageState extends State<SinglePromptPage> {
+class SinglePromptPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    PromptBloc bloc = BlocProvider.of<PromptBloc>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title, style: titleBarTextStyle(),),
+        title: Text("Single", style: titleBarTextStyle(),),
         elevation: 0.0,
       ),
       body: Padding(
@@ -32,10 +25,10 @@ class _SinglePromptPageState extends State<SinglePromptPage> {
             Expanded(
               child: Container(
                 child: StreamBuilder<Prompt>(
-                  stream: widget.bloc.prompt,
+                  stream: bloc.prompt,
                   builder: (context, snapshot) =>
                       Text(
-                        snapshot.data == null ? emptyPrompt : snapshot.data.prompt,
+                        snapshot.data == null ? emptyPrompt : snapshot.data.english,
                         style: promptTextStyle(),
                         textAlign: TextAlign.center,
                         key: Key(key_prompt_text),
@@ -46,7 +39,7 @@ class _SinglePromptPageState extends State<SinglePromptPage> {
             ),
             Expanded(
                 child: Container(
-                    child: RefreshPrompt(widget.bloc),
+                    child: RefreshPrompt(bloc),
                     alignment: Alignment(0, -1),
                 ),
             ),
@@ -54,7 +47,6 @@ class _SinglePromptPageState extends State<SinglePromptPage> {
         ),
       ),
        backgroundColor: titleBarBackground,
-       // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
