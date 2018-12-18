@@ -1,6 +1,6 @@
 This is just a mix of 2 different Flutter BLoC architectures:
 
-@Vanethos's https://github.com/Vanethos/flutter-writting-prompt/blob/develop/lib/presentation/ui/home.dart
+@Vanethos's https://github.com/Vanethos/flutter-writting-prompt
 
 @boeledi's https://github.com/boeledi/Streams-Block-Reactive-Programming-in-Flutter
 
