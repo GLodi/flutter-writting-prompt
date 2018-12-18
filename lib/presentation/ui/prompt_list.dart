@@ -7,14 +7,7 @@ import 'package:writing_prompt/presentation/styles/strings.dart';
 import 'package:writing_prompt/presentation/styles/text_styles.dart';
 import 'package:writing_prompt/domain/bloc/block_provider.dart';
 
-class PromptListPage extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() {
-    return _PromptListPageState();
-  }
-}
-
-class _PromptListPageState extends State<PromptListPage> {
+class PromptListPage extends StatelessWidget {
   PromptBloc bloc;
 
   @override
@@ -49,31 +42,33 @@ class _PromptListPageState extends State<PromptListPage> {
   }
 
   Widget _buildItem(Prompt prompt) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.only(left: screenPadding, right: screenPadding, bottom: listPadding, top: listPadding),
-        child: Row(
-          children: <Widget>[
-            Expanded(
-                child: Text(prompt.english)
+    return StreamBuilder<Prompt>(
+      stream: bloc.promptBool,
+      builder: (context, snapshot) =>
+        Container(
+          child: Padding(
+            padding: const EdgeInsets.only(left: screenPadding, right: screenPadding, bottom: listPadding, top: listPadding),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                    child: Text(prompt.english)
+                ),
+                Checkbox(
+                    value: prompt.done == null ? false : prompt.done,
+                    onChanged: (bool newValue) {
+                      prompt.done = newValue;
+                      bloc.promptUpdate.add(prompt);
+                    }
+                ),
+              ],
             ),
-            Checkbox(
-                value: prompt.done == null ? false : prompt.done,
-                onChanged: (bool newValue) {
-                  setState(() {
-                    prompt.done = newValue;
-                    bloc.promptUpdate.add(prompt);
-                  });
-                }
-            )
-          ],
+          ),
+          decoration: BoxDecoration(
+              border: new Border(
+                  bottom: new BorderSide()
+              )
+          ),
         ),
-      ),
-      decoration: BoxDecoration(
-          border: new Border(
-              bottom: new BorderSide()
-          )
-      ),
     );
   }
 }

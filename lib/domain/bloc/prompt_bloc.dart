@@ -10,12 +10,17 @@ class PromptBloc extends BlocBase {
 
   final _promptSubject = BehaviorSubject<Prompt>();
   final _promptHistorySubject = BehaviorSubject<List<Prompt>>();
+  final _promptBoolSubject = BehaviorSubject<Prompt>();
   final _promptUpdateSubject = PublishSubject<Prompt>();
   final _promptInsertSubject = PublishSubject<Prompt>();
   final _fetchPromptSubject = PublishSubject<int>();
 
+  // OUT
   Stream<Prompt> get prompt => _promptSubject.stream;
   Stream<List<Prompt>> get promptHistory => _promptHistorySubject.stream;
+  Stream<Prompt> get promptBool => _promptBoolSubject.stream;
+
+  // IN
   Sink<Prompt> get promptUpdate => _promptUpdateSubject.sink;
   Sink<Prompt> get promptInsert => _promptInsertSubject.sink;
   Sink<int> get fetchPrompt => _fetchPromptSubject.sink;
@@ -27,10 +32,10 @@ class PromptBloc extends BlocBase {
         .listen(_updatePrompt);
 
     _promptInsertSubject
-      .listen(_insertPrompt);
+        .listen(_insertPrompt);
 
     _fetchPromptSubject
-      .listen((_) => _fetchPrompt());
+        .listen((_) => _fetchPrompt());
 
     // fetches first prompt
     fetchPrompt.add(0);
@@ -39,6 +44,7 @@ class PromptBloc extends BlocBase {
   void _updatePrompt(Prompt prompt) {
     _promptManager.updatePrompt(prompt)
         .listen((_) => _);
+    _promptBoolSubject.add(prompt);
   }
 
   void _insertPrompt(Prompt prompt) {
